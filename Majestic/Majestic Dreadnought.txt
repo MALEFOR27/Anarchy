@@ -1,0 +1,606 @@
+generateBall = (xx, yy, zz, length, radius, segments, l_segments, tx, vertical, angle) ->
+  xzpos = []
+  ypos = []
+  width = []
+  for i in [0..segments]
+    ang = (i/segments)*Math.PI
+    width.push(Math.sin(ang)*radius)
+    ypos.push(-Math.cos(ang)*length)
+    xzpos.push(0)
+    
+  return k = 
+    section_segments: l_segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: xzpos
+      y: ypos
+      z: xzpos
+    width: width
+    height: width
+    texture: tx
+    vertical: vertical
+    angle: angle
+  
+Array::mult = (m) -> @map (v) -> v*m
+Array::add = (m) -> @map (v) -> v+m
+
+Array::mult.toFixed = ->;
+Array::add.toFixed = ->;
+  
+ringGen = (xx, yy, zz, segments, length, width, thick, thicc, vert, tx, angle) ->
+  return k =
+    section_segments: segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      y: [-2.25,-1.75,-1.25,0,1.25,1.75,2.25,1.75,1.25,0,-1.25,-1.75,-2.25].mult(thick+thicc)
+      z: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+    width: [width,width+1*thick,width+2*thick,width+2.5*thick,width+2*thick,width+1*thick,width,width-1*thick,width-2*thick,width-2.5*thick,width-2*thick,width-1*thick,width]
+    height: [length,length+1*thick,length+2*thick,length+2.5*thick,length+2*thick,length+1*thick,length,length-1*thick,length-2*thick,length-2.5*thick,length-2*thick,length-1*thick,length]
+    vertical: vert
+    texture: tx
+    angle: angle
+
+bodyStarY = (name, number, aroundX, aroundY, aoffset = 0, offx = 0, spawn) ->
+  b = model.bodies[name]
+  
+  delete model.bodies[name]
+  
+  for i in [0..(number-1)] by 1
+    
+    if(spawn!=undefined&&!spawn[i])
+      continue
+    
+    if(i == 0)
+      n = name
+    else
+      n = name+"star"+i
+    nposx = [];
+    nposz = [];
+    
+    ang = (i*360/number)+aoffset
+    a = ang
+    ang = ang*0.0174533
+
+    for j in [0..b.position.x.length-1] by 1
+      if(j>=b.position.z.length)
+        break;
+      ox = b.position.x[j]
+      oz = b.position.z[j]
+      nposx.push(ox*Math.cos(ang)-oz*Math.sin(ang))
+      nposz.push(ox*Math.sin(ang)+oz*Math.cos(ang))
+    
+    ox = b.offset.x-aroundX
+    oz = b.offset.z-aroundY
+    
+    segments = b.section_segments
+    
+    if(segments.length != undefined)
+      segments = segments.add(a)
+    
+    model.bodies[n] =
+      section_segments: segments
+      offset:
+        x: 0
+        y: b.offset.y
+        z: aroundY+ox*Math.sin(ang)+oz*Math.cos(ang)+aroundY
+      position:
+        x: nposx.add(ox*Math.cos(ang)-oz*Math.sin(ang)+aroundX+offx)
+        y: b.position.y.slice(0)
+        z: nposz.add(0)
+      width: b.width.slice(0)
+      height: b.height.slice(0)
+      texture: b.texture.slice(0)
+      angle: b.angle
+      propeller: b.propeller
+      vertical: b.vertical
+      laser: b.laser
+
+pylonGen = (xx, yy, zz, ofstx, length, width, height, thickness, size, tx, ang, vert) ->
+  return k =
+    section_segments: [45,135,225,315]
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: [0,0,0,0,6,6,6,6,6,6,6,6,0,0,0,0,0,0,6,0,6,0,6,0,6,0,6,0,0,0,0,6,0,6,0,6,0,6,0,6,0,0,6,6,0,6,0,6,0,6,0,6,0,6,6,6,6,0,6,0,6,0,6,0,6,0,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6].mult(width*size).add(-3+ofstx)
+      y: [0,0,50,50,0,0,50,50,0,0,50,50,0,0,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0].add(-25).mult(height*size)
+      z: [0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6,0,0,6,0,6,0,6,0,6,0,6,0,0,0,0,6,0,6,0,6,0,6,0,6,0,0,6,6,0,6,0,6,0,6,0,6,0,6,6,6,6,0,6,0,6,0,6,0,6,0,6,6].mult(length*size).add(-3)
+    width: [0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0].mult(thickness*size)
+    height: [0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0].mult(thickness*size)
+    texture: tx
+    angle: ang
+    vertical: vert
+
+addTurret = (n, xpos, ypos, zpos, size, angle, dmg, rt, spd, nmbr) ->
+  model.bodies['turretBase'+n] =
+    section_segments: 8
+    offset:
+      x: xpos
+      y: zpos
+      z: -ypos
+    position:
+      x: [0,0,0,0,0,0]
+      y: [-15,-15,-4,-4].mult(size)
+      z: [0,0,0,0,0,0].mult(size)
+    width: [0,22,18,0].mult(size)
+    height: [0,22,18,0].mult(size)
+    texture: [2,2,17]
+    vertical: true
+  model.bodies['turret'+n] =
+    section_segments: [0,45,60,120,135,180,225,240,300,315]
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0]
+      y: [-17,-15,-10,10,15,25].mult(size)
+      z: [0,0,0,0,5,8].mult(size)
+    width: [0,9,14,16,6,0].mult(size)
+    height: [0,3,5,5,3,0].mult(size)
+    texture: [2,2,11,2,17].add(-0.09)
+    angle: angle
+  model.bodies['gunCentre'+n] =
+    section_segments: 6
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos+(3.5*size)
+    position:
+      x: [0,0,0,0,0,0,0,0]
+      y: [-50,-50,-43,-43,-35,-35,-13,-5].mult(size)
+      z: [0,0,0,0,0,0,0,0]
+    width: [0,2,2,1,1,2,3,0].mult(size)
+    height: [0,2,2,1,1,2,3,0].mult(size)
+    texture: [3,3,3,12,2,10,2]
+    angle: angle
+    laser:
+      damage: dmg
+      rate: rt
+      speed: spd
+      number: nmbr
+  model.bodies['gunRight'+n] =
+    section_segments: 6
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos+(3*size)
+    position:
+      x: [0,0,0,0,0,0,0,0].add(7*size)
+      y: [-47,-47,-40,-40,-32,-32,-10,-2].mult(size)
+      z: [0,0,0,0,0,0,0,0]
+    width: [0,2,2,1,1,2,3,0].mult(size)
+    height: [0,2,2,1,1,2,3,0].mult(size)
+    texture: [3,3,3,12,2,10,2]
+    angle: angle
+    laser:
+      damage: dmg
+      rate: rt
+      speed: spd
+      number: nmbr
+  model.bodies['gunLeft'+n] =
+    section_segments: 6
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos+(3*size)
+    position:
+      x: [0,0,0,0,0,0,0,0].add(-7*size)
+      y: [-47,-47,-40,-40,-32,-32,-10,-2].mult(size)
+      z: [0,0,0,0,0,0,0,0]
+    width: [0,2,2,1,1,2,3,0].mult(size)
+    height: [0,2,2,1,1,2,3,0].mult(size)
+    texture: [3,3,3,12,2,10,2]
+    angle: angle
+    laser:
+      damage: dmg
+      rate: rt
+      speed: spd
+      number: nmbr
+  
+
+addQuad = (n, xpos, ypos, zpos, size, angle, dmg, rt, spd, nmbr) ->
+  model.bodies['quadBase'+n] =
+    section_segments: 8
+    offset:
+      x: xpos
+      y: zpos
+      z: -ypos
+    position:
+      x: [0,0,0,0].mult(size)
+      y: [-25,-25,-5,-5].mult(size)
+      z: [0,0,0,0].mult(size)
+    width: [0,20,15,0].mult(size)
+    height: [0,20,15,0].mult(size)
+    texture: [2,2,17]
+    vertical: true
+  model.bodies['quadTurret'+n] =
+    section_segments: 8
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0,0,0,0,0].mult(size)
+      y: [-22,-21,-16,-14,-14,14,14,16,21,22].mult(size)
+      z: [0,0,0,0,0,0,0,0,0,0].mult(size)
+    width: [0,10,15,15,12,12,15,15,10,0].mult(size)
+    height: [0,6,12,12,9,9,12,12,6,0].mult(size)
+    texture: [17,2,17,2,2,2,17,2,17]
+    vertical: false
+    angle: 90+angle
+  model.bodies['quadTurretFront'+n] =
+    section_segments: [45,135,225,315]
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0].mult(size)
+      y: [-18,-18,10,10].mult(size)
+      z: [2,2,2,2].mult(size)
+    width: [0,15,15,0].mult(size)
+    height: [0,6,6,0].mult(size)
+    texture: [1,11,2]
+    vertical: false
+    angle: angle
+  model.bodies['gunBarrel1'+n] =
+    section_segments: 4
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0,0,0].add(-9*size)
+      y: [-50,-50,-43,-43,-25,-25,0,0].mult(size)
+      z: [0,0,0,0,0,0,0,0].add(6*size)
+    width: [0,2,2,1,1,3,3,0].mult(size)
+    height: [0,2,2,1,1,3,3,0].mult(size)
+    texture: [17,3,3,1,3,3,3]
+    angle: angle
+    laser:
+      damage: dmg
+      rate: rt
+      speed: spd
+      number: nmbr
+  model.bodies['gunBarrel2'+n] =
+    section_segments: 4
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0,0,0].add(-9*size)
+      y: [-50,-50,-43,-43,-25,-25,0,0].mult(size)
+      z: [0,0,0,0,0,0,0,0].add(-2*size)
+    width: [0,2,2,1,1,3,3,0].mult(size)
+    height: [0,2,2,1,1,3,3,0].mult(size)
+    texture: [17,3,3,1,3,3,3]
+    angle: angle
+    laser:
+      damage: dmg
+      rate: rt
+      speed: spd
+      number: nmbr
+  model.bodies['gunBarrel3'+n] =
+    section_segments: 4
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0,0,0].add(9*size)
+      y: [-50,-50,-43,-43,-25,-25,0,0].mult(size)
+      z: [0,0,0,0,0,0,0,0].add(6*size)
+    width: [0,2,2,1,1,3,3,0].mult(size)
+    height: [0,2,2,1,1,3,3,0].mult(size)
+    texture: [17,3,3,1,3,3,3]
+    angle: angle
+    laser:
+      damage: dmg
+      rate: rt
+      speed: spd
+      number: nmbr
+  model.bodies['gunBarrel4'+n] =
+    section_segments: 4
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0,0,0].add(9*size)
+      y: [-50,-50,-43,-43,-25,-25,0,0].mult(size)
+      z: [0,0,0,0,0,0,0,0].add(-2*size)
+    width: [0,2,2,1,1,3,3,0].mult(size)
+    height: [0,2,2,1,1,3,3,0].mult(size)
+    texture: [17,3,3,1,3,3,3]
+    angle: angle
+    laser:
+      damage: dmg
+      rate: rt
+      speed: spd
+      number: nmbr
+  
+  
+addQuadNB = (n, xpos, ypos, zpos, size, angle, dmg, rt, spd, nmbr) ->
+  model.bodies['quadTurret'+n] =
+    section_segments: 6
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0,0,0,0,0].mult(size)
+      y: [-22,-21,-16,-14,-14,14,14,16,21,22].mult(size)
+      z: [0,0,0,0,0,0,0,0,0,0].mult(size)
+    width: [0,10,15,15,12,12,15,15,10,0].mult(size)
+    height: [0,6,12,12,9,9,12,12,6,0].mult(size)
+    texture: [17,2,17,2,2,2,17,2,17]
+    vertical: false
+    angle: 90+angle
+  model.bodies['quadTurretFront'+n] =
+    section_segments: [45,135,225,315]
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0].mult(size)
+      y: [-18,-18,10,10].mult(size)
+      z: [2,2,2,2].mult(size)
+    width: [0,15,15,0].mult(size)
+    height: [0,6,6,0].mult(size)
+    texture: [1,11,2]
+    vertical: false
+    angle: angle
+  model.bodies['gunBarrel1'+n] =
+    section_segments: 4
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0,0,0].add(-9*size)
+      y: [-50,-50,-43,-43,-25,-25,0,0].mult(size)
+      z: [0,0,0,0,0,0,0,0].add(6*size)
+    width: [0,2,2,1,1,3,3,0].mult(size)
+    height: [0,2,2,1,1,3,3,0].mult(size)
+    texture: [17,3,3,1,3,3,3]
+    angle: angle
+    laser:
+      damage: dmg
+      rate: rt
+      speed: spd
+      number: nmbr
+  model.bodies['gunBarrel2'+n] =
+    section_segments: 4
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0,0,0].add(9*size)
+      y: [-50,-50,-43,-43,-25,-25,0,0].mult(size)
+      z: [0,0,0,0,0,0,0,0].add(6*size)
+    width: [0,2,2,1,1,3,3,0].mult(size)
+    height: [0,2,2,1,1,3,3,0].mult(size)
+    texture: [17,3,3,1,3,3,3]
+    angle: angle
+    laser:
+      damage: dmg
+      rate: rt
+      speed: spd
+      number: nmbr
+  
+  
+s = 36
+a = 170
+segs = []
+for i in [0..s] by 1
+  segs.push(a*i)
+  #whoa... this is useless :D 
+
+model =
+  name: 'Majestic Dreadnought'
+  level: 6
+  model: 1
+  size: 2.5
+  zoom: 1.3
+  next: [701,702]
+  specs:
+    shield:
+      capacity: [1400,2000]
+      reload: [20,30]
+    generator:
+      capacity: [1000,1500]
+      reload: [250,350]
+    ship:
+      mass: 1800
+      speed: [50,65]
+      rotation: [6,10]
+      acceleration: [12,20]
+  bodies:
+    main:
+      section_segments: 10
+      offset:
+        x: 0
+        y: 0
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        y: [-300,-280,-220,-220,-200,-200,-170,-130,-100,-60,-60,20,20,100,100,150,150,190,240,240,260,260,290]
+        z: [0,0,0,0,0,0,-3,-3,-5,-5,5,7,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,6,15,5,5,15,35,35,45,45,75,75,60,58,40,40,24,24,20,10,10,45,15]
+      height: [0,6,10,5,5,10,16,16,20,20,40,50,38,38,25,25,24,24,18,10,10,20,0]
+      texture: [11,1,1,16,1,1,11,1,1,1,10,1,11,1,1,1,11,11,1,16,2,2]
+    sidesMain:
+      section_segments: [45,135,225,315]
+      offset:
+        x: 68
+        y: 0
+        z: -10
+      position:
+        x: [-17.2,-17.2,-5,17.7,17.7,0,-17.2,-17.2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0].mult(0.8)
+        y: [-100,-100,-80,-80,120,120,140,140].mult(0.8)
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,85,95,15,15,75,55,0].mult(0.8)
+      height: [0,15,15,10,10,15,15,0].mult(0.8)
+      texture: [2]
+    sidesFront1:
+      section_segments: 12
+      offset:
+        x: 50
+        y: -90
+        z: -5
+      position:
+        x: [-15,0,0,0,0,0,0,0]
+        y: [-100,-50,0,5,30,30]
+        z: [0,0,0,0,0,0,0,0]
+      width: [0,15,15,15,15,0]
+      height: [0,15,15,15,15,0]
+      texture: [2,2,17,11]
+    sidesFront2:
+      section_segments: 8
+      offset:
+        x: 20
+        y: -200
+        z: -5
+      position:
+        x: [-10,0,0,0,0,0,0,0]
+        y: [-80,-25,0,5,30,30]
+        z: [0,0,0,0,0,0,0,0]
+      width: [0,8,8,8,8,0]
+      height: [0,8,8,8,8,0]
+      texture: [11,1,17,11]
+    sidesBack:
+      section_segments: 8
+      offset:
+        x: 55
+        y: 70
+        z: -5
+      position:
+        x: [0,0,0,0,0,0,0,0]
+        y: [-80,-50,50,55,80,80]
+        z: [0,0,0,0,0,0,0,0]
+      width: [0,15,15,15,15,0]
+      height: [0,15,15,15,15,0]
+      texture: [1,1,17,11,17]
+    backPipes:
+      section_segments: 8
+      offset:
+        x: 30
+        y: 205
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0]
+        y: [-60,-60,60,60]
+        z: [0,0,0,0,0,0,0,0]
+      width: [0,4,4,0]
+      height: [0,4,4,0]
+      texture: [1]
+    bridgePlatform:
+      section_segments: 10
+      offset:
+        x: 0
+        y: 0
+        z: -20
+      position:
+        x: [0,0,0,0]
+        y: [0,0,120,130].mult(0.7)
+        z: [0,0,-20,-20]
+      width: [0,30,20,0]
+      height: [0,60,40,10]
+      texture: [16]
+      vertical: true
+    bridgeSupport:
+      section_segments: 10
+      offset:
+        x: 0
+        y: 0
+        z: -20
+      position:
+        x: [0,0,0,0]
+        y: [0,0,120,130].mult(0.7)
+        z: [0,0,-20,-20]
+      width: [0,30,20,0]
+      height: [0,60,40,10]
+      texture: [16]
+      vertical: true
+    bridgeLevels:
+      section_segments: [0,10,90,100,140,180,220,260,270,350]
+      offset:
+        x: 0
+        y: 5
+        z: 15-20
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        y: [40,40,50,60,70,70,80,90,100,100,110,130,135].mult(0.6).add(15)
+        z: [-2,-2,-4,-6,-6,-6,-8,-10,-10,-10,-12,-24,-24].mult(1.6)
+      width: [0,35,35,0,0,30,30,0,0,25,25,10,0].mult(1.0)
+      height: [0,60,58,0,0,55,53,0,0,50,47,15,0].mult(1.3)
+      texture: [2,17,2,2,2,17,2,2,2,17,9,2]
+      vertical: true
+    bridgeLevelsI:
+      section_segments: [0,10,90,100,140,180,220,260,270,350]
+      offset:
+        x: 0
+        y: 5
+        z: 14.8-20
+      position:
+        x: [0,0,0]
+        y: [110,130,135].mult(0.6).add(15)
+        z: [-12,-24,-24].mult(1.6)
+      width: [25,10,0].mult(1.0)
+      height: [47,15,0].mult(1.3)
+      texture: 2
+      vertical: true
+    propellers:
+      section_segments: 1
+      offset:
+        x: 55
+        y: 180
+        z: -5
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [16]
+      height: [16]
+      propeller: true
+    ring: ringGen(0,30,52,16,40,58,2,0,false,[17,2,2,2,17,2],90)
+
+
+for i in [0...4]
+  model.bodies['sideBits'+i] =
+    section_segments: [45,135,225,315]
+    offset:
+      x: 93
+      y: i*43-49
+      z: -12
+    position:
+      x: [0,0,0,0,6,6,0,0,0,0].mult(0.8)
+      y: [-25,-25,-20,-15,-15,15,15,20,25,25].mult(0.8)
+      z: [0,-2,0,0,-8,-8,0,0,-2,0].mult(0.8)
+    width: [0,18,18,12,5,5,12,18,18,0].mult(0.8)
+    height: [0,17,20,20,6,6,20,20,17,0].mult(0.8)
+    texture: [1]
+    angle: 0
+  addQuadNB(4+i,96,i*43-49,-10,0.5,-90,[8,12],2,[120,150],1)
+
+addQuad(0,42,40,33,0.6,-90,[8,12],2,[120,150],1)
+addQuad(1,52,-40,40,0.6,-60,[8,12],2,[120,150],1)
+addQuad(2,42,75,33,0.6,-90,[8,12],2,[120,150],1)
+addQuad(3,52,-5,43,0.6,-60,[8,12],2,[120,150],1)
+addTurret(0,0,-95,28,1.5,0,[20,40],1,[100,120],1)
+addTurret(1,0,-160,19,1.3,0,[20,40],1,[100,120],1)
+addTurret(2,0,120,30,1.3,180,[20,40],1,[100,120],1)
+
+return model;

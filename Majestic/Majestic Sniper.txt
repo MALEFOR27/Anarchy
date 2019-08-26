@@ -1,0 +1,257 @@
+multiplyArray = (arr, m) ->
+  k = [];
+  for i in [0...arr.length]
+    k.push(arr[i]*m)
+  return k;
+  
+ringGen = (xx, yy, zz, segments, length, width, thick, thicc, vert, tx, angle) ->
+  return k =
+    section_segments: segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      y: multiplyArray([-2.25,0,2.25,0,-2.25], thick+thicc)
+      z: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+    width: [width,width+2.5*thick,width,width-2.5*thick,width]
+    height: [length,length+2.5*thick,length,length-2.5*thick,length]
+    vertical: vert
+    texture: [tx]
+    angle: angle
+
+generateBall = (xx, yy, zz, length, radius, segments, l_segments, tx, vertical, angle) ->
+  xzpos = []
+  ypos = []
+  width = []
+  for i in [0..segments]
+    ang = (i/segments)*Math.PI
+    width.push(Math.sin(ang)*radius)
+    ypos.push(-Math.cos(ang)*length)
+    xzpos.push(0)
+    
+  return k = 
+    section_segments: l_segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: xzpos
+      y: ypos
+      z: xzpos
+    width: width
+    height: width
+    texture: tx
+    vertical: vertical
+    angle: angle
+
+model =
+  name: 'Majestic Sniper'
+  level: 4
+  model: 1
+  size: 2
+  zoom: 1.2
+  next: [501,502]
+  specs:
+    shield:
+      capacity: [500,600]
+      reload: [12,18]
+    generator:
+      capacity: [260,340]
+      reload: [90,110]
+    ship:
+      mass: 700
+      speed: [40,55]
+      rotation: [18,25]
+      acceleration: [50,70]
+  bodies:
+    main:
+      section_segments: 8
+      offset:
+        x: 0
+        y: -70
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0]
+        y: [-150,0,0,105,100]
+        z: [0,0,0,0,0,0,0,0]
+      width: [0,10,15,20,0]
+      height: [0,10,15,20,0]
+      texture: [49,10]
+      laser:
+        damage: [120,180]
+        rate: 0.3333334
+        speed: [140,200]
+        number: 1
+    back: generateBall(0,80,0,48,48,16,16,10,false,0)
+    cockpit:
+      section_segments: 12
+      offset:
+        x: 0
+        y: 80
+        z: -50
+      position:
+        x: [0,0,0,0,0,0,0]
+        y: [0,5,12,18,24,40,70]
+        z: [-18,-15,-5,-5,-15,-2,15]
+      width: [0,15,20,20,15,10,15]
+      height: [0,25,40,40,15,10,15]
+      texture: [1,9,9,1]
+      vertical: true
+      angle: 180
+    sides:
+      section_segments: 8
+      offset:
+        x: 20
+        y: 0
+        z: -8
+      position:
+        x: [-6,0,0,0,0,0]
+        y: [-60,-30,40,100,100]
+        z: [0,0,0,0,0,0]
+      width: [0,10,20,10,0]
+      height: [0,10,20,10,0]
+      texture: [2]
+    propeller:
+      section_segments: 1
+      offset:
+        x: 0
+        y: 190
+        z: 0
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [40]
+      height: [40]
+      texture: [3,3,17]
+      propeller: true
+    ring1: ringGen(0,-75,0,16,22,22,3,0.5,false,0,0)
+    ring2: ringGen(0,-85,0,16,18,18,2.5,0.5,false,0,0)
+    ring3: ringGen(0,-80,0,16,35,35,1.5,0.5,false,6,0)
+    ring4: ringGen(0,-130,0,16,25,25,1.2,0.4,false,6,0)
+    ring5: ringGen(0,-180,0,16,15,15,1,0.2,false,6,0)
+    ring6: ringGen(0,-210,0,16,7,7,0.8,0.1,false,6,0)
+    ring7: ringGen(0,0,100,16,15,15,0.8,0.5,true,49,0)
+    ring8: ringGen(0,0,100,16,15,15,0.8,0.5,true,49,-90)
+    ring9: ringGen(0,0,75,16,30,30,0.8,0.5,true,49,0)
+    ring10: ringGen(1,0,75,16,30,30,0.8,0.5,true,49,-60)
+    ring11: ringGen(0,120,0,16,60,60,4,0.5,false,2,0)
+    ring12: ringGen(0,160,0,16,55,55,3,0.5,false,2,0)
+    ring13: ringGen(0,200,0,16,40,40,2.5,0.5,false,17,0)
+    ring14: ringGen(0,240,0,16,32,32,1.5,0.5,false,17,0)
+    ring15: ringGen(0,80,0,16,40,40,8,0.5,false,1,0)
+    ring16: ringGen(25,-10,-40,16,50,40,3,0.5,true,0,20)
+    ring17: ringGen(30,0,-45,16,30,20,3,0.5,true,0,-30)
+    ring18: ringGen(20,0,-20,16,50,25,1.5,0.5,true,0,-50)
+    ring19: ringGen(10,0,-20,16,30,25,1.5,0.5,true,63,-60)
+    ring20: ringGen(0.1,5,10,16,30,25,1,0.5,true,63,-70)
+    ring21: ringGen(0,107,0,16,32,32,8.5,0.5,false,2,0)
+    
+    ball1: generateBall(0,-90,0,15,15,16,16,17,false,0)
+    ball2: generateBall(0,-140,0,10,10,16,16,49,false,0)
+    ball3: generateBall(0,-190,0,6,6,16,16,49,false,0)
+    ball4: generateBall(0,78,-72,10,10,12,12,63,true,0)
+    ball5: generateBall(0,76,-52,6,6,8,8,63,true,0)
+    
+    joins_back1:
+      section_segments: 8
+      offset:
+        x: 59
+        y: 125
+        z: 8
+      position:
+        x: [-15,0,-5,-12,-16,0]
+        y: [-40,-0,40,75,116]
+        z: [0,0,0,0,0,0]
+      width: [3,3,3,3,3]
+      height: [3,3,3,3,3]
+      texture: [2]
+      angle: -6
+    joins_back2:
+      section_segments: 8
+      offset:
+        x: 57
+        y: 125
+        z: -8
+      position:
+        x: [-15,0,-5,-12,-16,0]
+        y: [-40,-0,40,75,116]
+        z: [0,0,0,0,0,0]
+      width: [3,3,3,3,3]
+      height: [3,3,3,3,3]
+      texture: [2]
+      angle: -6
+    joins_back3:
+      section_segments: 8
+      offset:
+        x: 0
+        y: 125
+        z: 53
+      position:
+        x: [0,0,0,0,0,0]
+        y: [-40,-0,40,75,116]
+        z: [-15,0,-5,-15,-24,0]
+      width: [3,3,3,3,3]
+      height: [3,3,3,3,3]
+      texture: [2]
+      angle: 0
+    joins_back4:
+      section_segments: 8
+      offset:
+        x: 10
+        y: 125
+        z: 52
+      position:
+        x: [0,0,0,0,0,0]
+        y: [-40,-0,40,75,116]
+        z: [-15,0,-5,-15,-24,0]
+      width: [3,3,3,3,3]
+      height: [3,3,3,3,3]
+      texture: [2]
+      angle: 0
+
+for i in [0...-3]
+  model.bodies['emitter'+i] =
+    section_segments: 1
+    offset:
+      x: 7+(i*3)
+      y: (i*45)-110
+      z: 0
+    position:
+      x: [0]
+      y: [0]
+      z: [0]
+    width: [1]
+    height: [1]
+    angle: -90
+    laser:
+      damage: [2,2]
+      rate: 0.3333334
+      speed: [10,10]
+      number: 5
+      error: 30
+
+for i in [0.1..1] by 0.1
+  model.bodies['trail'+i] =
+    section_segments: 1
+    offset:
+      x: 0
+      y: -220
+      z: 0
+    position:
+      x: [0]
+      y: [0]
+      z: [0]
+    width: [1]
+    height: [1]
+    laser:
+      damage: [4,4]
+      rate: 0.3333334
+      speed: [140*i,200*i]
+      number: 1
+      error: 0
+
+return model;

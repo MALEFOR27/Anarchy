@@ -1,0 +1,193 @@
+Array::mult = (m) -> @map (v) -> v*m
+Array::add = (m) -> @map (v) -> v+m
+
+for key, value of []
+  delete Array::[key]
+  Object.defineProperty Array::, key,
+    value: value
+    configurable: true
+    enumerable: false
+  
+ringGen = (xx, yy, zz, segments, length, width, thick, vert, tx, angle) ->
+  return k =
+    section_segments: segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      y: [-2.25,-1.75,-1.25,0,1.25,1.75,2.25,1.75,1.25,0,-1.25,-1.75,-2.25].mult(thick)
+      z: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+    width: [width,width+1*thick,width+2*thick,width+2.5*thick,width+2*thick,width+1*thick,width,width-1*thick,width-2*thick,width-2.5*thick,width-2*thick,width-1*thick,width]
+    height: [length,length+1*thick,length+2*thick,length+2.5*thick,length+2*thick,length+1*thick,length,length-1*thick,length-2*thick,length-2.5*thick,length-2*thick,length-1*thick,length]
+    vertical: vert
+    texture: tx
+    angle: angle
+
+
+generateBall = (xx, yy, zz, length, radius, segments, l_segments, tx, vertical, angle) ->
+  xzpos = []
+  ypos = []
+  width = []
+  for i in [0..segments]
+    ang = (i/segments)*Math.PI
+    width.push(Math.sin(ang)*radius)
+    ypos.push(-Math.cos(ang)*length)
+    xzpos.push(0)
+    
+  return k = 
+    section_segments: l_segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: xzpos
+      y: ypos
+      z: xzpos
+    width: width
+    height: width
+    texture: tx
+    vertical: vertical
+    angle: angle
+
+d = 20
+s = 0.01
+r = 3
+return model =
+  name: 'Majestic Edge'
+  designer: 'Malefic Machinations'
+  level: 3
+  model: 2
+  size: 0.7
+  zoom: 1.5
+  next: [401,402]
+  specs:
+    shield:
+      capacity: [300,400]
+      reload: [9,15]
+    generator:
+      capacity: [100,150]
+      reload: [70,90]
+    ship:
+      mass: 150
+      speed: [125,150]
+      rotation: [48,60]
+      acceleration: [100,130]
+  bodies:
+    main:
+      section_segments: [0,25,80,90,100,155,180,205,260,270,280,335]
+      offset:
+        x: 0
+        y: 0
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0]
+        y: [-170,-130,-50,-30,0,20,60,60,110,110]
+        z: [0,0,0,0,0,0,0,0,0,0]
+      width: [0,18,20,40,40,60,60,50,30,0]
+      height: [0,12,12,24,24,37,37,30,30,0]
+      texture: [1,11,1,10,1,11,1,2,17]
+    cockpit:
+      section_segments: [0,25,80,90,100,155,180,205,260,270,280,335]
+      offset:
+        x: 0
+        y: -40
+        z: 10
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0]
+        y: [-80,-40,-10,20,70]
+        z: [2,0,0,0,0,0,0,0,0,0]
+      width: [0,12,12,12,12]
+      height: [0,16,16,16,16]
+      texture: [9,9,31,9]
+    wire5: ringGen(0.001,53,0,10,40,48,3,false,[1,17,1,1,17,1],-35)
+    sides:
+      section_segments: 8
+      offset:
+        x: 90
+        y: -90
+        z: 0
+       position:
+        x: [-52,-30,5,20,6,-35,-47,-47,0,0,0,0,0].mult(1.1)
+        y: [-75,-60,-20,20,60,100,138,138].mult(1.4)
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,10,15,18,22,25,10,0]
+      height: [0,8,15,20,20,22,10,0]
+      texture: [1,1,1,1,10,2,17]
+    sidesI:
+      section_segments: [45,135,225,315]
+      offset:
+        x: 90
+        y: -90
+        z: 0
+       position:
+        x: [-52.3,-30,5,20,6,-35,-47,0,0,0,0,0].mult(1.1)
+        y: [-75.5,-60,-20,20,60,100,138].mult(1.4)
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,10,15,18,22,25,10].mult(1.035)
+      height: [0,8,15,20,20,22,10].mult(1.035)
+      texture: [63]
+    guns_top:
+      section_segments: 8
+      offset:
+        x: 30
+        y: 0
+        z: 20
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        y: [-110,-110,-95,-95,-85,-85,-72,-72,-55,-55,-30,-30,30]
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,3,3,5,5,3,3,5,5,3,3,7,7]
+      height: [0,3,3,5,5,3,3,5,5,3,3,7,7]
+      texture: [49,1,2,2,2,1,2,2,2,1,2,2]
+      laser:
+        damage: [10,18]
+        rate: 8
+        speed: [160,240]
+        number: 2
+        angle: 8
+    propeller:
+      section_segments: [1]
+      offset:
+        x: 0
+        y: 190
+        z: 0
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [32]
+      height: [32]
+      texture: [0]
+      propeller: true
+    propellerSides:
+      section_segments: 1
+      offset:
+        x: 38
+        y: 125
+        z: 0
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [11]
+      height: [11]
+      texture: [0]
+      propeller: true
+  wings:
+    mainWings:
+      doubleside: true
+      offset:
+        x: 35
+        y: -10
+        z: 0
+      length: [80]
+      width: [80,40]
+      angle: [0]
+      position: [25,-50]
+      texture: 11
+      bump:
+        position: 20
+        size: 15

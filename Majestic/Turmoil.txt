@@ -1,0 +1,420 @@
+generateBall = (xx, yy, zz, length, radius, segments, l_segments, tx, vertical, angle) ->
+  xzpos = []
+  ypos = []
+  width = []
+  for i in [0..segments]
+    ang = (i/segments)*Math.PI
+    width.push(Math.sin(ang)*radius)
+    ypos.push(-Math.cos(ang)*length)
+    xzpos.push(0)
+    
+  return k = 
+    section_segments: l_segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: xzpos
+      y: ypos
+      z: xzpos
+    width: width
+    height: width
+    texture: tx
+    vertical: vertical
+    angle: angle
+  
+Array::add = (mod) -> @map (val) -> val + mod
+Array::mult = (mod) -> @map (val) -> val * mod
+Array::div = (mod) -> @map (val) -> val / mod
+Array::step = (step) -> i for i in @ by step
+Array::fill = (val, len) -> val for i in (
+  if len
+  then [0...len]
+  else if @length == 1
+  then [0...@[0]]
+  else @
+)
+
+for key, value of []
+  delete Array::[key]
+  Object.defineProperty Array::, key,
+    value: value
+    configurable: true
+    enumerable: false
+
+ringGen = (xx, yy, zz, segments, length, width, thick, thicc, vert, tx, angle) ->
+  return k =
+    section_segments: segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      y: [-2.25,-1.75,-1.25,0,1.25,1.75,2.25,1.75,1.25,0,-1.25,-1.75,-2.25].mult(thick+thicc)
+      z: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+    width: [width,width+1*thick,width+2*thick,width+2.5*thick,width+2*thick,width+1*thick,width,width-1*thick,width-2*thick,width-2.5*thick,width-2*thick,width-1*thick,width]
+    height: [length,length+1*thick,length+2*thick,length+2.5*thick,length+2*thick,length+1*thick,length,length-1*thick,length-2*thick,length-2.5*thick,length-2*thick,length-1*thick,length]
+    vertical: vert
+    texture: tx
+    angle: angle
+
+bodyStarY = (name, number, aroundX, aroundY, aoffset = 0, offx = 0, spawn) ->
+  b = model.bodies[name]
+  
+  delete model.bodies[name]
+  
+  for i in [0..(number-1)] by 1
+    
+    if(spawn!=undefined&&!spawn[i])
+      continue
+    
+    if(i == 0)
+      n = name
+    else
+      n = name+"star"+i
+    nposx = [];
+    nposz = [];
+    
+    ang = (i*360/number)+aoffset
+    a = ang
+    ang = ang*0.0174533
+
+    for j in [0..b.position.x.length-1] by 1
+      if(j>=b.position.z.length)
+        break;
+      ox = b.position.x[j]
+      oz = b.position.z[j]
+      nposx.push(ox*Math.cos(ang)-oz*Math.sin(ang))
+      nposz.push(ox*Math.sin(ang)+oz*Math.cos(ang))
+    
+    ox = b.offset.x-aroundX
+    oz = b.offset.z-aroundY
+    
+    segments = b.section_segments
+    
+    if(segments.length != undefined)
+      segments = segments.add(a)
+    
+    model.bodies[n] =
+      section_segments: segments
+      offset:
+        x: 0
+        y: b.offset.y
+        z: aroundY+ox*Math.sin(ang)+oz*Math.cos(ang)+aroundY
+      position:
+        x: nposx.add(ox*Math.cos(ang)-oz*Math.sin(ang)+aroundX+offx)
+        y: b.position.y.slice(0)
+        z: nposz.add(0)
+      width: b.width.slice(0)
+      height: b.height.slice(0)
+      texture: b.texture.slice(0)
+      angle: b.angle
+      propeller: b.propeller
+      vertical: b.vertical
+      laser: b.laser
+
+model =
+  name: 'Turmoil'
+  level: 6
+  model: 3
+  size: 2.2
+  zoom: 1.3
+  next: [702,703]
+  specs:
+    shield:
+      capacity: [450,550]
+      reload: [20,28]
+    generator:
+      capacity: [400,500]
+      reload: [210,325]
+    ship:
+      mass: 500
+      speed: [70,90]
+      rotation: [35,45]
+      acceleration: [50,65]
+  bodies:
+    frontMain:
+      section_segments: 12
+      offset:
+        x: 0
+        y: 0
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        y: [-100,-90,-50,0,8,15,20,80,78,90,90,110,110].mult(1.2)
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,3,10,17,2,4,26,26,24,24,28,28,0].mult(1.3)
+      height: [0,3,6,8,2,4,10,10,9,9,11,11,0].mult(1.6)
+      texture: [1,1,11,1,1,1,11,17,12,2,2,17]
+    cockpit:
+      section_segments: 6
+      offset:
+        x: 0
+        y: -20
+        z: 10
+      position:
+        x: [0,0,0,0,0,0]
+        y: [-40,-38,-15,10,50,60]
+        z: [0,0,0,0,0,0]
+      width: [0,3,8,13,13,0]
+      height: [0,2.5,6,9,9,0]
+      texture: [4,9,9,18,4]
+    sidesMain:
+      section_segments: [0,75,105,180,265,275]
+      offset:
+        x: 70
+        y: 20
+        z: -1
+      position:
+        x: [-20,-20,-20,-20,-20,-20,-20,-20,-20,-20,-20,-20,-20,-20,0,0,0,-10,-10,0,0,0,0,0,0]
+        y: [-40,-40,-18,-18,-14,-14,0,0,4,4,20,20,24,24,35,35,37,45,46].mult(1.2)
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,6,6,20,20,6,6,25,25,6,6,30,30,10,10,60,58,20,0].mult(1.3)
+      height: [0,4,4,10,10,4,4,10,10,4,4,10,10,5,5,15,15,6,0]
+      texture: [1,16,1,17,1,16,1,17,1,16,1,17,1,8,1,17,1,17]
+      angle: 75
+    guns:
+      section_segments: 12
+      offset:
+        x: 30
+        y: 30
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0]
+        y: [-100,-80,-30,0,20,60,90]
+        z: [0,0,0,0,0,0,0]
+      width: [0,3,3,10,12,12,0]
+      height: [0,3,3,10,12,12,0]
+      texture: [17,1,18,1,11,2]
+    gunWires:
+      section_segments: 4
+      offset:
+        x: 30
+        y: 30
+        z: 0
+      position:
+        x: [0,0,0,0, 5,5,5,5, -5,-5,-5,-5, 0,0,0,0]
+        y: [-80,-80,40,40, -80,-80,40,40, -80,-80,40,40, -80,-80,40,40]
+        z: [5,5,5,5, 0,0,0,0, 0,0,0,0, -5,-5,-5,-5]
+      width: [0,1,1,0, 0,1,1,0, 0,1,1,0, 0,1,1,0]
+      height: [0,1,1,0, 0,1,1,0, 0,1,1,0, 0,1,1,0]
+      texture: [3]
+    enginesTop:
+      section_segments: 16
+      offset:
+        x: 32
+        y: 100
+        z: 24
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+        y: [-20,-18,-10,-12,-14,-10,5,28,30,25,35,38].mult(1.3)
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,2,4,12,14,17,15,9,7,4,2,0]
+      height: [0,2,4,12,14,17,15,9,7,4,2,0]
+      texture: [2,2,12,1,18,2,11,1,17,13]
+    enginesBot:
+      section_segments: 16
+      offset:
+        x: 32
+        y: 100
+        z: -24
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+        y: [-20,-18,-10,-12,-14,-10,5,28,30,25,35,38].mult(1.3)
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,2,4,12,14,17,15,9,7,4,2,0]
+      height: [0,2,4,12,14,17,15,9,7,4,2,0]
+      texture: [2,2,12,1,18,2,11,1,17,13]
+    thrusterTopBot:
+      section_segments: [45,135,225,315]
+      offset:
+        x: 0
+        y: 92
+        z: 0
+      position:
+        x: [0,0,0,0,0, 0,0,0,0,0]
+        y: [0,0,2,35,35, 0,0,2,35,35]
+        z: [20,20,20,20,20, -20,-20,-20,-20,-20]
+      width: [0,17,18,18,0, 0,17,18,18,0]
+      height: [0,5,6,6,0,0,5,6,6,0]
+      texture: [1,17,18,17,1,1,17,18,17]
+    cables:
+      section_segments: 8
+      offset:
+        x: 5
+        y: 10
+        z: 0
+      position:
+        x: [0,0,2,2 ,0,0,2,2 ,5,5,10,10]
+        y: [-14,-14,14,14 ,-14,-14,14,14 ,-14,-14,14,14]
+        z: [3,3,5,5 ,-3,-3,-5,-5 ,0,0,0,0]
+      width: [0,2,2,0 ,0,2,2,0 ,0,3,3,0]
+      height: [0,2,2,0 ,0,2,2,0 ,0,3,3,0]
+      texture: [3]
+    spikes:
+      section_segments: [45,135,225,315]
+      offset:
+        x: 97
+        y: 88
+        z: -3
+      position:
+        x: [-20,-20,-20,-20,-20, -10,-10,-10,-10,-10, 0,0,0,0,0, 10,10,10,10,10, 20,20,20,20,20]
+        y: [0,0,20,38,50, 0,0,18,35,45, 0,0,16,28,40, 0,0,14,23,35, 0,0,12,20,30]
+        z: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0]
+      width: [0,5,7,5,0, 0,5,7,4,0, 0,4,6.5,4,0, 0,4,6,4,0, 0,4,5.5,4,0]
+      height: [0,2,2,2,0, 0,2,2,2,0, 0,2,2,2,0, 0,2,2,2,0, 0,2,2,2,0]
+      texture: [4]
+      angle: 55
+    cores: generateBall(30,-52,0,8,8,12,12,17,false,0)
+    propeller1:
+      section_segments: 1
+      offset:
+        x: 0
+        y: 150
+        z: 0
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [25]
+      height: [20]
+      propeller: true
+    propeller2:
+      section_segments: 1
+      offset:
+        x: 15
+        y: 150
+        z: 0
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [15]
+      height: [15]
+      propeller: true
+    propeller3:
+      section_segments: 1
+      offset:
+        x: 32
+        y: 140
+        z: 24
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [10]
+      height: [10]
+      propeller: true
+    propeller4:
+      section_segments: 1
+      offset:
+        x: 32
+        y: 140
+        z: -24
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [10]
+      height: [10]
+      propeller: true
+  wings:
+    main:
+      doubleside: true
+      offset:
+        x: 24
+        y: 50
+        z: -3
+      length: [60,35]
+      width: [80,70,40]
+      angle: [0,0]
+      position: [5,25,-20]
+      texture: 11
+      bump:
+        position: 10
+        size: 4
+    backJoinsTop:
+      doubleside: true
+      offset:
+        x: 12
+        y: 92
+        z: 0
+      length: [70]
+      width: [40,20]
+      angle: [50]
+      position: [0,30]
+      texture: 18
+      bump:
+        position: 10
+        size: 20
+    backJoinsBot:
+      doubleside: true
+      offset:
+        x: 12
+        y: 92
+        z: 0
+      length: [70]
+      width: [40,20]
+      angle: [-50]
+      position: [0,30]
+      texture: 18
+      bump:
+        position: 10
+        size: 20
+    gunCovers:
+      doubleside: true
+      offset:
+        x: 30
+        y: -10
+        z: -10
+      length: [10,6,6,10]
+      width: [60,70,110,70,50]
+      angle: [30,80,120,140,170]
+      position: [10,0,-5,0,10,10]
+      texture: 2
+      bump:
+        position: 10
+        size: 2
+
+for i in [0...3]
+  model.bodies['emitterA' + i] =
+    section_segments: 1
+    offset:
+      x: 30
+      y: -80+(i*70)
+      z: 0
+    position:
+      x: [0]
+      y: [0]
+      z: [0]
+    width: [1]
+    height: [1]
+    laser:
+      damage: [15,25] # 108 144
+      rate: 1.2
+      speed: [150,220]
+      number: 1
+
+for i in [1..8]
+  model.bodies['emitterB' + i] =
+    section_segments: 1
+    offset:
+      x: 30
+      y: -52
+      z: 0
+    position:
+      x: [0]
+      y: [-180]
+      z: [0]
+    width: [1]
+    height: [1]
+    angle: i*(360/8)
+    laser:
+      damage: [10,15]
+      rate: 0.6
+      speed: [-150,-220]
+      number: 1
+
+return model;

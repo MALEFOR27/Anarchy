@@ -1,0 +1,327 @@
+multiplyArray = (arr, m) ->
+  k = [];
+  for i in [0..arr.length]
+    k.push(arr[i]*m)
+  return k;
+  
+ringGen = (xx, yy, zz, segments, length, width, thick, vert, tx, angle) ->
+  return k =
+    section_segments: segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      y: multiplyArray([-2.25,-1.75,-1.25,0,1.25,1.75,2.25,1.75,1.25,1,-1.25,-1.75,-2.25], thick)
+      z: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+    width: [width,width+1*thick,width+2*thick,width+2.5*thick,width+2*thick,width+1*thick,width,width-1*thick,width-2*thick,width-2.5*thick,width-2*thick,width-1*thick,width]
+    height: [length,length+1*thick,length+2*thick,length+2.5*thick,length+2*thick,length+1*thick,length,length-1*thick,length-2*thick,length-2.5*thick,length-2*thick,length-1*thick,length]
+    vertical: vert
+    texture: tx
+    angle: angle
+
+generateBall = (xx, yy, zz, length, radius, segments, l_segments, tx, vertical, angle) ->
+  xzpos = []
+  ypos = []
+  width = []
+  for i in [0..segments]
+    ang = (i/segments)*Math.PI
+    width.push(Math.sin(ang)*radius)
+    ypos.push(-Math.cos(ang)*length)
+    xzpos.push(0)
+    
+  return k = 
+    section_segments: l_segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: xzpos
+      y: ypos
+      z: xzpos
+    width: width
+    height: width
+    texture: tx
+    vertical: vertical
+    angle: angle
+
+
+return model =
+  name: 'Majestic Wyvern'
+  level: 3
+  model: 3
+  size: 1
+  zoom: 1.4
+  next: [402,403]
+  specs:
+    shield:
+      capacity: [350,400]
+      reload: [10,15]
+    generator:
+      capacity: [150,220]
+      reload: [65,90]
+    ship:
+      mass: 250
+      speed: [100,125]
+      rotation: [60,90]
+      acceleration: [70,90]
+  bodies:
+    main:
+      section_segments: 12
+      offset:
+        x: 0
+        y: 25
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        y: [-200,-165,-170,-160,-150,-140,-105,-40,-15,25,25,85,85,90,95,100,105,110,115,115,110,100,95]
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,5,10,15,18,14,20,40,40,40,80,80,35,41,43,45,43,41,35,30,27,24,0]
+      height: [0,5,8,15,18,12,15,20,20,20,22.5,22.5,26,31,32,34,32,31,26,22.5,20,18,0]
+      texture: [49,17,1,1,1,1,1,1,1,1,16,2,2,2,2,2,2,2,2,2,17]
+      laser:
+        damage: [50,60]
+        rate: 1
+        type: 1
+        speed: [150,200]
+        number: 1
+    cockpit:
+      section_segments: 12
+      offset:
+        x: 0
+        y: -75
+        z: 10
+      position:
+        x: [0,0,0,0,0]
+        y: [-10,8,37,80,200]
+        z: [4,3,2,5,5]
+      width: [0,13,15,20,22]
+      height: [0,10,15,15,15]
+      texture: [2,9,10,1]
+    main_sides:
+      section_segments: 12
+      offset:
+        x: 80
+        y: 50
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0]
+        y: [-125,-100,-103,-95,-85,-80,-45,-10,20,55]
+        z: [0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,3,6,12,14,12,15,17,27,25]
+      height: [0,3,6,12,14,12,15,17,25,25]
+      texture: [49,17,1,1,1,1,1,1,8,17]
+      laser:
+        damage: [15,22]
+        rate: 3
+        type: 1
+        speed: [160,250]
+        number: 1
+    propulsors:
+      section_segments: 8
+      offset:
+        x: 0
+        y: 175
+        z: 0
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [35]
+      height: [26]
+      propeller: true
+      texture: [17]
+    wing_joints:
+      section_segments: 18
+      offset:
+        x: 80
+        y: 15
+        z: -35
+      position:
+        x: [0,0,0,0]
+        y: [0,5,8,10]
+        z: [0,0,0,0]
+      width: [10,15,12,0]
+      height: [10,15,12,0]
+      texture: [17,3,17]
+      vertical: true
+      angle: 0
+    circle_centre:
+      section_segments: 18
+      offset:
+        x: 0
+        y: 24
+        z: -80
+      position:
+        x: [0,0,0,0,0]
+        y: [0,5,8,9,10]
+        z: [0,0,0,0,0]
+      width: [20,30,27,25,0]
+      height: [20,30,27,25,0]
+      texture: [17,3,39,17]
+      vertical: true
+    circle_centre1:
+      section_segments: 18
+      offset:
+        x: 0
+        y: 24
+        z: -30
+      position:
+        x: [0,0,0,0]
+        y: [0,5,8,10]
+        z: [0,0,0,0]
+      width: [10,15,12,0]
+      height: [10,15,12,0]
+      texture: [17,3,17]
+      vertical: true
+      angle: 0
+    outer_ring:
+      section_segments: 10
+      offset:
+        x: 80
+        y: 60
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+        y: [0,10,22,38,43,49,58,33,27,15,8,5,0]
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [30,35,38,40,38,35,30,25,22,20,22,25,30]
+      height: [30,35,38,40,38,35,30,25,22,20,22,25,30]
+      texture: [1,1,1,1,1,1]
+    side_propulsors:
+      section_segments: 10
+      offset:
+        x: 80
+        y: 113
+        z: 0
+      position:
+        x: [0,0,0,0]
+        y: [0,5,9,8]
+        z: [0,0,0,0]
+      width: [25,30,25,0]
+      height: [25,30,25,0]
+      texture: [17,1,17]
+      propeller: true
+    decor:
+      section_segments: 6
+      offset:
+        x: 0
+        y: 25
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0]
+        y: [-150,-140,-105,-60,-40,25,25]
+        z: [0,0,0,0,0,0,0,0]
+      width: [0,15,21.5,20,42,42,0]
+      height: [0,13,16.5,18,22,22,0]
+      texture: [63]
+    feather1:
+      section_segments: 8
+      offset:
+        x: 108
+        y: 70
+        z: 0
+      position:
+        x: [0,0,0,0,0]
+        y: multiplyArray([0,20,45,80,100],0.6)
+        z: [0,0,0,0,0]
+      width: multiplyArray([8,10,12,7,0],0.6)
+      height: multiplyArray([2,2,2,1,0],0.6)
+      texture: [1]
+      angle: 40
+    feather2:
+      section_segments: 8
+      offset:
+        x: 108
+        y: 100
+        z: 0
+      position:
+        x: [0,0,0,0,0]
+        y: multiplyArray([0,20,45,80,100],0.65)
+        z: [0,0,0,0,0]
+      width: multiplyArray([8,10,12,7,0],0.65)
+      height: multiplyArray([2,2,2,1,0],0.65)
+      texture: [1]
+      angle: 38
+    feather3:
+      section_segments: 8
+      offset:
+        x: 90
+        y: 30
+        z: 0
+      position:
+        x: [0,0,0,0,0]
+        y: multiplyArray([0,20,45,80,100],0.45)
+        z: [0,0,0,0,0]
+      width: multiplyArray([8,10,12,7,0],0.45)
+      height: multiplyArray([2,2,2,1,0],0.45)
+      texture: [1]
+      angle: 45
+    feather4:
+      section_segments: 8
+      offset:
+        x: 90
+        y: 10
+        z: 0
+      position:
+        x: [0,0,0,0,0]
+        y: multiplyArray([0,20,45,80,100],0.45)
+        z: [0,0,0,0,0]
+      width: multiplyArray([8,10,12,7,0],0.45)
+      height: multiplyArray([2,2,2,1,0],0.45)
+      texture: [1]
+      angle: 45
+    feather5:
+      section_segments: 8
+      offset:
+        x: 88
+        y: -11
+        z: 0
+      position:
+        x: [0,0,0,0,0]
+        y: multiplyArray([0,20,45,80,100],0.45)
+        z: [0,0,0,0,0]
+      width: multiplyArray([8,10,12,7,0],0.45)
+      height: multiplyArray([2,2,2,1,0],0.45)
+      texture: [1]
+      angle: 45
+    ring1: ringGen(60,60,10,16,30,40,3,false,[1,1,17,1,17,1],-50)
+    ring2: ringGen(50,70,15,16,30,35,1.7,false,[1,1,17,1,17,1],-35)
+    ring3: ringGen(50,60,12,16,15,35,1.7,false,63,80)
+    ring4: ringGen(40,63,12,16,15,30,1.7,false,63,80)
+    ring5: ringGen(0,-5,15,16,70,50,1.7,true,[1,1,17,1,17,1],0)
+    ring6: ringGen(0,5,30,16,40,40,1.7,true,[1,1,17,1,17,1],0)
+    ring7: ringGen(10,5,52,16,45,20,1.4,true,[1,1,17,1,17,1],-50)
+    #ring8: ringGen(15,8,70,16,25,15,0.8,true,1,-50)
+    #ring9: ringGen(40,12,-15,16,40,40,1.5,true,1,10)
+  wings:
+    main:
+      doubleside: true
+      offset:
+        x: 17
+        y: 30
+        z: 15
+      length: [52]
+      width: [90,75]
+      angle: [-12]
+      position: [0,10]
+      texture: [11]
+      bump:
+        position: -20
+        size: 10
+    back:
+      doubleside: true
+      offset:
+        x: 16
+        y: 95
+        z: 22
+      length: [55]
+      width: [32,32]
+      angle: [-5]
+      position: [0,0]
+      texture: [0]
+      bump:
+        position: 0
+        size: 0

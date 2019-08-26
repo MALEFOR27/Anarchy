@@ -1,0 +1,652 @@
+generateBall = (xx, yy, zz, length, radius, segments, l_segments, tx, vertical, angle) ->
+  xzpos = []
+  ypos = []
+  width = []
+  for i in [0..segments]
+    ang = (i/segments)*Math.PI
+    width.push(Math.sin(ang)*radius)
+    ypos.push(-Math.cos(ang)*length)
+    xzpos.push(0)
+    
+  return k = 
+    section_segments: l_segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: xzpos
+      y: ypos
+      z: xzpos
+    width: width
+    height: width
+    texture: tx
+    vertical: vertical
+    angle: angle
+
+multiplyArray = (arr, m) ->
+  k = [];
+  for i in [0..arr.length]
+    k.push(arr[i]*m)
+  return k;
+
+addArray = (arr, m) ->
+  k = [];
+  for i in [0..arr.length]
+    k.push(arr[i]+m)
+  return k;
+  
+ringGen = (xx, yy, zz, segments, length, width, thick, thicc, vert, tx, angle) ->
+  return k =
+    section_segments: segments
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      y: multiplyArray([-2.25,-1.75,-1.25,0,1.25,1.75,2.25,1.75,1.25,0,-1.25,-1.75,-2.25], thick+thicc)
+      z: [0,0,0,0,0,0,0,0,0,0,0,0,0]
+    width: [width,width+1*thick,width+2*thick,width+2.5*thick,width+2*thick,width+1*thick,width,width-1*thick,width-2*thick,width-2.5*thick,width-2*thick,width-1*thick,width]
+    height: [length,length+1*thick,length+2*thick,length+2.5*thick,length+2*thick,length+1*thick,length,length-1*thick,length-2*thick,length-2.5*thick,length-2*thick,length-1*thick,length]
+    vertical: vert
+    texture: tx
+    angle: angle
+
+bodyStarY = (name, number, aroundX, aroundY, aoffset = 0, offx = 0, spawn) ->
+  b = model.bodies[name]
+  
+  delete model.bodies[name]
+  
+  for i in [0..(number-1)] by 1
+    
+    if(spawn!=undefined&&!spawn[i])
+      continue
+    
+    if(i == 0)
+      n = name
+    else
+      n = name+"star"+i
+    nposx = [];
+    nposz = [];
+    
+    ang = (i*360/number)+aoffset
+    a = ang
+    ang = ang*0.0174533
+
+    for j in [0..b.position.x.length-1] by 1
+      if(j>=b.position.z.length)
+        break;
+      ox = b.position.x[j]
+      oz = b.position.z[j]
+      nposx.push(ox*Math.cos(ang)-oz*Math.sin(ang))
+      nposz.push(ox*Math.sin(ang)+oz*Math.cos(ang))
+    
+    ox = b.offset.x-aroundX
+    oz = b.offset.z-aroundY
+    
+    segments = b.section_segments
+    
+    if(segments.length != undefined)
+      segments = addArray(segments,a)
+    
+    model.bodies[n] =
+      section_segments: segments
+      offset:
+        x: 0
+        y: b.offset.y
+        z: aroundY+ox*Math.sin(ang)+oz*Math.cos(ang)+aroundY
+      position:
+        x: addArray(nposx,ox*Math.cos(ang)-oz*Math.sin(ang)+aroundX+offx)
+        y: b.position.y.slice(0)
+        z: addArray(nposz,0)
+      width: b.width.slice(0)
+      height: b.height.slice(0)
+      texture: b.texture.slice(0)
+      angle: b.angle
+      propeller: b.propeller
+      vertical: b.vertical
+      laser: b.laser
+
+pylonGen = (xx, yy, zz, ofstx, length, width, height, thickness, size, tx, ang, vert) ->
+  return k =
+    section_segments: [45,135,225,315]
+    offset:
+      x: xx
+      y: yy
+      z: zz
+    position:
+      x: addArray(multiplyArray([0,0,0,0,6,6,6,6,6,6,6,6,0,0,0,0,0,0,6,0,6,0,6,0,6,0,6,0,0,0,0,6,0,6,0,6,0,6,0,6,0,0,6,6,0,6,0,6,0,6,0,6,0,6,6,6,6,0,6,0,6,0,6,0,6,0,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6],width*size),-3+ofstx)
+      y: multiplyArray(addArray([0,0,50,50,0,0,50,50,0,0,50,50,0,0,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0,0,5,10,15,20,25,30,35,40,45,50,50,0],-25),height*size)
+      z: addArray(multiplyArray([0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,6,6,6,0,0,6,0,6,0,6,0,6,0,6,0,0,0,0,6,0,6,0,6,0,6,0,6,0,0,6,6,0,6,0,6,0,6,0,6,0,6,6,6,6,0,6,0,6,0,6,0,6,0,6,6],length*size),-3)
+    width: multiplyArray([0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0],thickness*size)
+    height: multiplyArray([0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0,0,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0],thickness*size)
+    texture: tx
+    angle: ang
+    vertical: vert
+
+addTurret = (n, xpos, ypos, zpos, size, angle) ->
+  model.bodies['turretBase'+n] =
+    section_segments: 8
+    offset:
+      x: xpos
+      y: zpos
+      z: -ypos
+    position:
+      x: [0,0,0,0,0,0]
+      y: multiplyArray([-15,-15,-4,-4],size)
+      z: multiplyArray([0,0,0,0,0,0],size)
+    width: multiplyArray([0,22,18,0],size)
+    height: multiplyArray([0,22,18,0],size)
+    texture: [4,4,17]
+    vertical: true
+  model.bodies['turret'+n] =
+    section_segments: [0,45,60,120,135,180,225,240,300,315]
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos
+    position:
+      x: [0,0,0,0,0,0]
+      y: multiplyArray([-17,-15,-10,10,15,25],size)
+      z: multiplyArray([0,0,0,0,5,8],size)
+    width: multiplyArray([0,9,14,16,6,0],size)
+    height: multiplyArray([0,3,5,5,3,0],size)
+    texture: addArray([4,4,18,3,3],-0.09)
+    angle: angle
+  model.bodies['gunCentre'+n] =
+    section_segments: 6
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos+(3.5*size)
+    position:
+      x: [0,0,0,0,0,0,0,0]
+      y: multiplyArray([-50,-50,-43,-43,-35,-35,-13,-5],size)
+      z: [0,0,0,0,0,0,0,0]
+    width: multiplyArray([0,2,2,1,1,2,3,0],size)
+    height: multiplyArray([0,2,2,1,1,2,3,0],size)
+    texture: [4,4,4,13,3,10,3]
+    angle: angle
+    laser:
+      damage: [15,25]
+      rate: 0.6
+      speed: [100,130]
+      number: 1
+  model.bodies['gunRight'+n] =
+    section_segments: 6
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos+(3*size)
+    position:
+      x: addArray([0,0,0,0,0,0,0,0],7*size)
+      y: multiplyArray([-47,-47,-40,-40,-32,-32,-10,-2],size)
+      z: [0,0,0,0,0,0,0,0]
+    width: multiplyArray([0,2,2,1,1,2,3,0],size)
+    height: multiplyArray([0,2,2,1,1,2,3,0],size)
+    texture: [4,4,4,13,3,10,3]
+    angle: angle
+    laser:
+      damage: [15,25]
+      rate: 0.6
+      speed: [100,130]
+      number: 1
+  model.bodies['gunLeft'+n] =
+    section_segments: 6
+    offset:
+      x: xpos
+      y: ypos
+      z: zpos+(3*size)
+    position:
+      x: addArray([0,0,0,0,0,0,0,0],-7*size)
+      y: multiplyArray([-47,-47,-40,-40,-32,-32,-10,-2],size)
+      z: [0,0,0,0,0,0,0,0]
+    width: multiplyArray([0,2,2,1,1,2,3,0],size)
+    height: multiplyArray([0,2,2,1,1,2,3,0],size)
+    texture: [4,4,4,13,3,10,3]
+    angle: angle
+    laser:
+      damage: [15,25]
+      rate: 0.6
+      speed: [100,130]
+      number: 1
+  return model;
+
+d = 20
+s = 0.01
+r = 3
+
+model =
+  name: 'Majestic Cruiser'
+  level: 5
+  model: 1
+  size: 2.8
+  zoom: 1.3
+  next: [601,602]
+  specs:
+    shield:
+      capacity: [800,1000]
+      reload: [13,20]
+    generator:
+      capacity: [700,900]
+      reload: [360,400]
+    ship:
+      mass: 1000
+      speed: [90,120]
+      rotation: [8,16]
+      acceleration: [12,25]
+  bodies:
+    main:
+      section_segments: 16
+      offset:
+        x: 0
+        y: 0
+        z: 0
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        y: [-180,-130,-110,-110,-70,-70,-40,-15,20,20,40,40,100,100,120,120,150,150]
+        z: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      width: [0,13,15,20,20,25,25,40,40,25,25,50,50,25,25,40,40,0]
+      height: [0,8,8,10,10,12,12,20,20,12,12,20,20,12,12,15,15,0]
+      texture: addArray([11,10,17,11,17,1,10,11,1,16,1,10,1,16,1,11,17],-0)
+    cockpit:
+      section_segments: 8
+      offset:
+        x: 0
+        y: -30
+        z: 9
+      position:
+        x: [0,0,0,0,0,0]
+        y: [-120,-75,-32,0,20,45]
+        z: [-6,-3,0,0,0,0]
+      width: [0,6,6,15,15,5]
+      height: [0,6,6,15,15,5]
+      texture: [1,11,9,11,1]
+    cannons:
+      section_segments: 12
+      offset:
+        x: 30
+        y: 0
+        z: 0
+      position:
+        x: [0,0,0,0]
+        y: [-100,-80,-60,40]
+        z: [0,0,0,0]
+      width: [0,2,5,5]
+      height: [0,2,5,5]
+      texture: [17,1]
+    balls: generateBall(30, -80, 0, 6, 6, 10, 10, 17, false, 0)
+    band1: ringGen(0,30,0,16,18,27,2,0.3,false,[1,17,1,1,17,1],0)
+    band2: ringGen(0,110,0,16,18,32,2,0.3,false,[1,17,1,1,17,1],0)
+    band3: ringGen(67,0,-90,12,30,12,2,0.3,true,[1,17,1,1,17,1],-30)
+    band4: ringGen(67,-10,-90,12,30,12,2,0.3,true,[1,17,1,1,17,1],30)
+    band5: ringGen(0,0,120,12,30,18,1,0.3,true,[1,17,1,1,17,1],0)
+    sides:
+      section_segments: 12
+      offset:
+        x: 60
+        y: 30
+        z: -5
+      position:
+        x: [0,0,0,0,0,0,0,0,0,0]
+        y: [-120,-75,-40,-40,-20,-20,50,90,120,120]
+        z: [0,0,0,0,0,0,0,0,0,0]
+      width: [0,6,7,5,5,8,8,20,20,0]
+      height: [0,8,8,5,5,8,8,20,20,0]
+      texture: [1,1,1,2,2,11,2,11,17]
+    side_joints:
+      section_segments: [45,135,225,315]
+      offset:
+        x: 40
+        y: 60
+        z: -5
+      position:
+        x: [10,10,10,0,0,0]
+        y: [-45,-45,10,10,50,50]
+        z: [0,0,0,0,0,0]
+      width: [0,6,6,20,20,0]
+      height: [0,4,4,4,4,0]
+      texture: [1,10,16]
+    engines_top:
+      section_segments: 12
+      offset:
+        x: 25
+        y: 130
+        z: 15
+      position:
+        x: [0,0,0,0,0]
+        y: [-30,0,20,30,30]
+        z: [-8,0,0,0,0]
+      width: [6,10,15,15,0]
+      height: [6,10,15,15,0]
+      texture: [1,11,1,17]
+    engines_bot:
+      section_segments: 12
+      offset:
+        x: 25
+        y: 130
+        z: -15
+      position:
+        x: [0,0,0,0,0]
+        y: [-30,0,20,30,30]
+        z: [8,0,0,0,0]
+      width: [6,10,15,15,0]
+      height: [6,10,15,15,0]
+      texture: [1,11,1,17]
+    ###rods1:
+      section_segments: 8
+      offset:
+        x: 35
+        y: 50
+        z: 14
+      position:
+        x: [0,0,0,0]
+        y: [-35,-10,40,50]
+        z: [0,0,0,0]
+      width: [0,4,4,0]
+      height: [0,4,4,0]
+      texture: [2]###
+    rods2:
+      section_segments: 8
+      offset:
+        x: 73
+        y: 45
+        z: -5
+      position:
+        x: [0,0,0,0]
+        y: [-45,-10,50,70]
+        z: [0,0,0,0]
+      width: [0,6,6,0]
+      height: [0,6,6,0]
+      texture: [1,11,1]
+    rods3:
+      section_segments: 8
+      offset:
+        x: 65
+        y: 45
+        z: 8
+      position:
+        x: [0,0,0,0]
+        y: [-45,-10,50,70]
+        z: [0,0,0,0]
+      width: [0,6,6,0]
+      height: [0,6,6,0]
+      texture: [1,10,1]
+    rods4:
+      section_segments: 8
+      offset:
+        x: 65
+        y: 45
+        z: -18
+      position:
+        x: [0,0,0,0]
+        y: [-45,-10,50,70]
+        z: [0,0,0,0]
+      width: [0,6,6,0]
+      height: [0,6,6,0]
+      texture: [1,10,1]
+    propeller_main:
+      section_segments: 4
+      offset:
+        x: 0
+        y: 220
+        z: 0
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [30]
+      height: [10]
+      texture: [0]
+      propeller: true
+    propeller_sides:
+      section_segments: 4
+      offset:
+        x: 60
+        y: 200
+        z: -5
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [20]
+      height: [20]
+      texture: [0]
+      propeller: true
+    propeller_top:
+      section_segments: 4
+      offset:
+        x: 25
+        y: 190
+        z: 15
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [15]
+      height: [15]
+      texture: [0]
+      propeller: true
+    propeller_bot:
+      section_segments: 4
+      offset:
+        x: 25
+        y: 190
+        z: -15
+      position:
+        x: [0]
+        y: [0]
+        z: [0]
+      width: [15]
+      height: [15]
+      texture: [0]
+      propeller: true
+  wings:
+    sides_outer:
+      doubleside: true
+      offset:
+        x: 58
+        y: 0
+        z: -10
+      length: [10,5,5,10]
+      width: [20,20,100,20,20]
+      angle: [0,90,90,180]
+      position: [0,0,-20,0,0]
+      texture: [2]
+      bump:
+        position: 10
+        size: 5
+    ###sides_front:
+      doubleside: true
+      offset:
+        x: 5
+        y: -90
+        z: -5
+      length: [10,5,5,10]
+      width: [20,20,100,20,20]
+      angle: [0,90,90,180]
+      position: [0,0,-20,0,0]
+      texture: [2]
+      bump:
+        position: 10
+        size: 5###
+    sides_guns:
+      doubleside: true
+      offset:
+        x: 28
+        y: 20
+        z: -5
+      length: [10,5,5,10]
+      width: [40,40,170,40,40]
+      angle: [0,90,90,180]
+      position: [0,0,-50,0,0]
+      texture: [2]
+      bump:
+        position: 30
+        size: 3
+    ###gun_cover_top1:
+      doubleside: true
+      offset:
+        x: 20
+        y: 0
+        z: 2
+      length: [5,5,5,5,5]
+      width: [10,12,15,15,12,10]
+      angle: [60,30,0,-30,-60]
+      position: [0,0,0,0,0,0]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5
+    gun_cover_bot1:
+      doubleside: true
+      offset:
+        x: 20
+        y: 0
+        z: -2
+      length: [5,5,5,5,5]
+      width: [10,12,15,15,12,10]
+      angle: [-60,-30,0,30,60]
+      position: [0,0,0,0,0,0]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5###
+    gun_cover_top2:
+      doubleside: true
+      offset:
+        x: 20
+        y: -20
+        z: 2
+      length: [5,5,5,5,5]
+      width: [10,12,15,15,12,10]
+      angle: [60,30,0,-30,-60]
+      position: [0,0,0,0,0,0]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5
+    gun_cover_bot2:
+      doubleside: true
+      offset:
+        x: 20
+        y: -20
+        z: -2
+      length: [5,5,5,5,5]
+      width: [10,12,15,15,12,10]
+      angle: [-60,-30,0,30,60]
+      position: [0,0,0,0,0,0]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5
+    gun_cover_top3:
+      doubleside: true
+      offset:
+        x: 20
+        y: -40
+        z: 2
+      length: [5,5,5,5,5]
+      width: [10,12,15,15,12,10]
+      angle: [60,30,0,-30,-60]
+      position: [0,0,0,0,0,0]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5
+    gun_cover_bot3:
+      doubleside: true
+      offset:
+        x: 20
+        y: -40
+        z: -2
+      length: [5,5,5,5,5]
+      width: [10,12,15,15,12,10]
+      angle: [-60,-30,0,30,60]
+      position: [0,0,0,0,0,0]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5
+    gun_cover_top4:
+      doubleside: true
+      offset:
+        x: 20
+        y: -60
+        z: 2
+      length: [5,5,5,5,5]
+      width: [10,12,15,15,12,10]
+      angle: [60,30,0,-30,-60]
+      position: [0,0,0,0,0,0]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5
+    gun_cover_bot4:
+      doubleside: true
+      offset:
+        x: 20
+        y: -60
+        z: -2
+      length: [5,5,5,5,5]
+      width: [10,12,15,15,12,10]
+      angle: [-60,-30,0,30,60]
+      position: [0,0,0,0,0,0]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5
+    gun_cover_top5:
+      doubleside: true
+      offset:
+        x: 20
+        y: -75
+        z: 2
+      length: [5,5,5,5,5]
+      width: [10,12,10,10,12,15]
+      angle: [60,30,0,-30,-60]
+      position: [0,0,0,0,0,-5]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5
+    gun_cover_bot5:
+      doubleside: true
+      offset:
+        x: 20
+        y: -75
+        z: -2
+      length: [5,5,5,5,5]
+      width: [10,12,10,10,12,15]
+      angle: [-60,-30,0,30,60]
+      position: [0,0,0,0,0,-5]
+      texture: [2]
+      bump:
+        position: 0
+        size: 5
+
+addTurret(0,20, 56, 23, 0.7, -90)
+addTurret(1,20, 84, 23, 0.7, -90)
+addTurret(2,14, 5, 23, 0.6, -90)
+
+for i in [0...5] by 1
+  model.bodies['emitter'+i] =
+    section_segments: 1
+    offset:
+      x: 30
+      y: -10-(i*35)
+      z: 0
+    position:
+      x: [0]
+      y: [0]
+      z: [0]
+    width: [1]
+    height: [1]
+    laser:
+      damage: [12,20]
+      rate: 0.7
+      speed: [140,180]
+      number: 1
+
+return model;
