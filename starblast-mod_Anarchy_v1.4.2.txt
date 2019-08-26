@@ -1,5 +1,11 @@
-/*MALEFICS
+/*Anarchy v1.4.2
   by Malefic Machinations
+  
+  All ship edit code and mod exports from this mod are the property of Neuronality.
+  Credit for the work (rough percentage estimate) put into this mod go to:
+  MaleficArtist - 92%
+  123 Notus - 7.5%
+  Finalizer - 0.5%
 */
 
 //Majestic
