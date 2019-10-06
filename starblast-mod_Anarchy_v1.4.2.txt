@@ -207,7 +207,8 @@ this.options = {
   station_crystal_capacity: 1.2,
   station_repair_threshold: 0.1,
   starting_ship: lives,
-  
+  soundtrack: "argon.mp3",
+
 } ;
 
 var crystalGen_base_multiplier = 10;
