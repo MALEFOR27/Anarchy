@@ -1,4 +1,4 @@
-/*Anarchy v1.4.7
+/*Anarchy v1.5
   by Malefic Machinations
   
   All ship edit code and mod exports from this mod are the property of Neuronality.
@@ -189,7 +189,7 @@ if (mode === 1) {
 }
 
 this.options = {
-  map_name: "Anarchy v1.4.7", 
+  map_name: "Anarchy v1.5", 
   root_mode: gamemode,
   reset_tree: true,
   max_players: 60,
