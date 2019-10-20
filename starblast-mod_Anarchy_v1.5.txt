@@ -7,7 +7,7 @@
   123 Notus - 7.5%
   Finalizer - 0.5%
 */
-const mode = 1; //use values 0 or 1 to set the gamemode
+const mode = 0; //use values 0 or 1 to set the gamemode
 // 0 for team mode, regular anarchy gameplay
 // 1 for sandbox / showcasing
 var switch_button = {
